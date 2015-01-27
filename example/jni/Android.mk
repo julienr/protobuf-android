@@ -10,7 +10,7 @@ LOCAL_MODULE    := protobuf_example
 # we're building a shared library
 LOCAL_SRC_FILES := test.pb.cc
 
-LOCAL_STATIC_LIBRARIES += protobuf
+LOCAL_STATIC_LIBRARIES += libprotobuf
 LOCAL_LDLIBS := -lz
 
 include $(BUILD_SHARED_LIBRARY)

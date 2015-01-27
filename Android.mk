@@ -1,7 +1,7 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_MODULE    := protobuf
+LOCAL_MODULE    := libprotobuf
 
 LOCAL_SRC_FILES :=\
 	src/google/protobuf/descriptor_database.cc \
