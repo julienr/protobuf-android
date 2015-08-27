@@ -35,10 +35,15 @@ LOCAL_SRC_FILES :=\
 	src/google/protobuf/wire_format_lite.cc \
 	src/google/protobuf/wire_format.cc
 
+#$(warning $(TARGET_ARCH))
+
 ifeq ($(TARGET_ARCH),x86)
 	LOCAL_SRC_FILES := $(LOCAL_SRC_FILES) \
 										 src/google/protobuf/stubs/atomicops_internals_x86_gcc.cc
-
+endif
+ifeq ($(TARGET_ARCH),x86_64)
+	LOCAL_SRC_FILES := $(LOCAL_SRC_FILES) \
+										 src/google/protobuf/stubs/atomicops_internals_x86_gcc.cc
 endif
 
 LOCAL_CFLAGS := -D GOOGLE_PROTOBUF_NO_RTTI=1
