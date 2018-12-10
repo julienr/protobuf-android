@@ -3,7 +3,7 @@ include $(CLEAR_VARS)
 
 LOCAL_CPPFLAGS := -std=c++11
 
-LOCAL_MODULE    := protobuf_example
+LOCAL_MODULE := protobuf_test
 
 # To test compilation, generate a .pb.cc file and add it to local_src_files,
 # this will make the linker complain about everything that's missing because
