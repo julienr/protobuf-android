@@ -17,4 +17,5 @@ include $(BUILD_SHARED_LIBRARY)
 
 # This assumes protobuf-android is checked out in a directory named
 # protobuf-android
+$(call import-add-path, $(LOCAL_PATH)/../..)
 $(call import-module,protobuf-android)
