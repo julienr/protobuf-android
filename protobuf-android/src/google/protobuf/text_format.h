@@ -40,6 +40,9 @@
 
 #include <map>
 #include <memory>
+#ifndef _SHARED_PTR_H
+#include <google/protobuf/stubs/shared_ptr.h>
+#endif
 #include <string>
 #include <vector>
 
@@ -72,6 +75,8 @@ class LIBPROTOBUF_EXPORT TextFormat {
                                  io::ZeroCopyOutputStream* output);
 
   // Like Print(), but outputs directly to a string.
+  // Note: output will be cleared before prior to printing, and will
+  // be left empty even if printing fails.
   static bool PrintToString(const Message& message, string* output);
 
   // Like PrintUnknownFields(), but outputs directly to a string.
@@ -205,6 +210,29 @@ class LIBPROTOBUF_EXPORT TextFormat {
           print_message_fields_in_index_order;
     }
 
+    // If expand==true, expand google.protobuf.Any payloads. The output
+    // will be of form
+    //    [type_url] { <value_printed_in_text> }
+    //
+    // If expand==false, print Any using the default printer. The output will
+    // look like
+    //    type_url: "<type_url>"  value: "serialized_content"
+    void SetExpandAny(bool expand) {
+      expand_any_ = expand;
+    }
+
+    // If non-zero, we truncate all string fields that are  longer than this
+    // threshold.  This is useful when the proto message has very long strings,
+    // e.g., dump of encoded image file.
+    //
+    // NOTE(hfgong):  Setting a non-zero value breaks round-trip safe
+    // property of TextFormat::Printer.  That is, from the printed message, we
+    // cannot fully recover the original string field any more.
+    void SetTruncateStringFieldLongerThan(
+        const int64 truncate_string_field_longer_than) {
+      truncate_string_field_longer_than_ = truncate_string_field_longer_than;
+    }
+
     // Register a custom field-specific FieldValuePrinter for fields
     // with a particular FieldDescriptor.
     // Returns "true" if the registration succeeded, or "false", if there is
@@ -256,6 +284,8 @@ class LIBPROTOBUF_EXPORT TextFormat {
     void PrintUnknownFields(const UnknownFieldSet& unknown_fields,
                             TextGenerator& generator) const;
 
+    bool PrintAny(const Message& message, TextGenerator& generator) const;
+
     int initial_indent_level_;
 
     bool single_line_mode_;
@@ -268,15 +298,31 @@ class LIBPROTOBUF_EXPORT TextFormat {
 
     bool print_message_fields_in_index_order_;
 
-    scoped_ptr<const FieldValuePrinter> default_field_value_printer_;
-    typedef map<const FieldDescriptor*,
-                const FieldValuePrinter*> CustomPrinterMap;
+    bool expand_any_;
+
+    int64 truncate_string_field_longer_than_;
+
+    google::protobuf::scoped_ptr<const FieldValuePrinter> default_field_value_printer_;
+    typedef std::map<const FieldDescriptor*,
+                     const FieldValuePrinter*> CustomPrinterMap;
     CustomPrinterMap custom_printers_;
   };
 
   // Parses a text-format protocol message from the given input stream to
-  // the given message object.  This function parses the format written
-  // by Print().
+  // the given message object. This function parses the human-readable format
+  // written by Print(). Returns true on success. The message is cleared first,
+  // even if the function fails -- See Merge() to avoid this behavior.
+  //
+  // Example input: "user {\n id: 123 extra { gender: MALE language: 'en' }\n}"
+  //
+  // One use for this function is parsing handwritten strings in test code.
+  // Another use is to parse the output from google::protobuf::Message::DebugString()
+  // (or ShortDebugString()), because these functions output using
+  // google::protobuf::TextFormat::Print().
+  //
+  // If you would like to read a protocol buffer serialized in the
+  // (non-human-readable) binary wire format, see
+  // google::protobuf::MessageLite::ParseFromString().
   static bool Parse(io::ZeroCopyInputStream* input, Message* output);
   // Like Parse(), but reads directly from a string.
   static bool ParseFromString(const string& input, Message* output);
@@ -347,11 +393,13 @@ class LIBPROTOBUF_EXPORT TextFormat {
     ParseInfoTree* CreateNested(const FieldDescriptor* field);
 
     // Defines the map from the index-th field descriptor to its parse location.
-    typedef map<const FieldDescriptor*, vector<ParseLocation> > LocationMap;
+    typedef std::map<const FieldDescriptor*,
+                     std::vector<ParseLocation> > LocationMap;
 
     // Defines the map from the index-th field descriptor to the nested parse
     // info tree.
-    typedef map<const FieldDescriptor*, vector<ParseInfoTree*> > NestedMap;
+    typedef std::map<const FieldDescriptor*,
+                     std::vector<ParseInfoTree*> > NestedMap;
 
     LocationMap locations_;
     NestedMap nested_;
