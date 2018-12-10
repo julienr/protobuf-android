@@ -20,11 +20,18 @@ Update protobuf
 Build
 ~~~~~
 
-The `build` directory contains an example protobuf that can be compiled &
-linked by NDK to check that the linker has all the dependencies:
+You can build on any platform which NDK supports.
+
+Linux/Mac
 
   cd build
 
   ./build.sh
+
+Windows
+
+  cd build
+
+  build.bat
 
 Static library is located in ```build\obj\local\{platform}\libprotobuf.a```
