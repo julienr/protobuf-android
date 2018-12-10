@@ -1,0 +1,1 @@
+%NDK_ROOT%\ndk-build -j %NUMBER_OF_PROCESSORS%
