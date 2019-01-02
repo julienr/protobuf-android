@@ -1,3 +1,9 @@
+This repository has moved
+-------------------------
+This repository is unmaintained and contains a port of protobuf 2. For protobuf 3, see
+
+https://github.com/Dimon4eg/protobuf-android
+
 Google protobuf for Android NDK
 -------------------------------
 This builds a static library to use protobuf with C++ on android.
